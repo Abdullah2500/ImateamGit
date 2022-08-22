@@ -19,6 +19,8 @@ import { ActivityIndicator } from "react-native-paper";
 import { useGetFansQuery } from "../../../../Reducers/usersApi";
 import AddTeamMember from "../API/addTeamMembersApi";
 import DeleteMember from "../API/deleteTeamMemberApi";
+import { getTeamMembersApi, makeAdminApi } from "../API/makeAdminApi";
+import TeamLoader from "../TeamProfileImage/TeamLoader";
 
 const TeamDetails = ({ navigation, route }) => {
   const { item } = route.params;
@@ -34,11 +36,13 @@ const TeamDetails = ({ navigation, route }) => {
   const [memberList, fillMemberList] = useState([]);
   const [searchMember, setMemberSearch] = useState([]);
   const [searchFans, searchInput] = useState("");
+  const [isLoader, setIsLoader] = useState(false);
   const [nameSearchQuey, setNameSearchQuery] = useState("");
   const [typeSearchQuey, setTypeSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [connections, setConnections] = useState([]);
   const [filteredFans, setFans] = useState([]);
+  const [orgId, setOrgId] = useState("");
   const [userIds, setUserIds] = useState([]);
 
   const filtered = () => {
@@ -78,7 +82,9 @@ const TeamDetails = ({ navigation, route }) => {
   };
 
   const addMember = async () => {
+    setIsLoader(true);
     let response = await AddTeamMember(item.id, userIds);
+    setIsLoader(false);
     if (response.status === 200) {
       console.log("RESP", response);
       refetch();
@@ -90,7 +96,11 @@ const TeamDetails = ({ navigation, route }) => {
   };
 
   const delMember = async (memId) => {
+    setIsLoader(true);
+
     let response = await DeleteMember(item.id, memId);
+    setIsLoader(false);
+
     if (response) {
       console.log("DEL", response);
       refetch();
@@ -106,17 +116,18 @@ const TeamDetails = ({ navigation, route }) => {
     filteredFans.unshift(item);
   };
 
-  const makeAdmin = (item) => {
-    console.log('item ===> ', item)
-    // memberId ==> item.id
-    // params 220 -> item.organization
-    // item.organiztion to be sent in param api 
-    // put method
-    //  URL: https://dev.imateam.us:8443/organizations/members/220/
-    // {"memberId":257,"admin":true}
-  }
+  const makeAdmin = async (item) => {
+    console.log("item ===> ", item);
+    setIsLoader(true);
+    let bodyData = { admin: item.admin ? false : true, memberId: item.id };
+    console.log("bodyData====   >", bodyData);
+    let response = await makeAdminApi(item.organization, bodyData);
+    setIsLoader(false);
+    fillMemberList(response.data);
+  };
 
   const renderMember = (mem, id) => {
+    console.log("menber.admin===>", mem.admin);
     // const { item: mem, index: id } = member;
     return (
       <View
@@ -146,7 +157,12 @@ const TeamDetails = ({ navigation, route }) => {
             fontSize={16}
             imgUrl={mem.user_info.avatar.url}
           />
-          <Text numberOfLines={2} style={{ ...styles.text, maxWidth: getWidthPixel(110) }}>{mem.user_info.display_name}</Text>
+          <Text
+            numberOfLines={2}
+            style={{ ...styles.text, maxWidth: getWidthPixel(110) }}
+          >
+            {mem.user_info.display_name}
+          </Text>
         </TouchableOpacity>
         {/* User post list details modal */}
         <View style={styles.memType}>
@@ -157,7 +173,7 @@ const TeamDetails = ({ navigation, route }) => {
           <TouchableOpacity onPress={() => makeAdmin(mem)}>
             <Icon
               name="Safety"
-              size={getHeightPixel(17)}
+              size={mem.admin ? getHeightPixel(20) : getHeightPixel(18)}
               style={{
                 color: mem.admin ? colors.inputBlue : colors.accentGray,
               }}
@@ -178,17 +194,32 @@ const TeamDetails = ({ navigation, route }) => {
       </View>
     );
   };
-
+  const getOrgData = async (id) => {
+    console.log("Organ=====>Id", id);
+    let response = await getTeamMembersApi(id);
+    if (response.data) {
+      console.log(
+        "response from getMembers Data====>",
+        JSON.stringify(response.data)
+      );
+      fillMemberList(response.data);
+    } else {
+      console.log("error====>", response);
+    }
+  };
   useEffect(() => {
     if (!isFetching) {
-      fillMemberList(membersData);
+      if (membersData.length > 0) {
+        getOrgData(membersData[0].organization);
+      }
+      // fillMemberList(membersData);
     }
     if (!Fetching) {
       let fans = fansData?.filter((fan) => {
         return (
           fan.display_info.organization === false &&
           fan.display_info.display_name !=
-          memberList.map((x) => x.user_info.display_name)
+            memberList.map((x) => x.user_info.display_name)
         );
       });
       setConnections(fans);
@@ -196,7 +227,13 @@ const TeamDetails = ({ navigation, route }) => {
   }, [isFetching, Fetching]);
 
   return (
-    <View style={styles.modalContainer}>
+    <View
+      style={{
+        backgroundColor: colors.white,
+        flexDirection: "column",
+        flex: 1,
+      }}
+    >
       <SafeAreaView>
         <Header heading={`${item.name}`} navigation={navigation} teams={true} />
       </SafeAreaView>
@@ -219,31 +256,31 @@ const TeamDetails = ({ navigation, route }) => {
           <View style={styles.connections}>
             {filteredFans.length
               ? filteredFans.map((x, id) => {
-                return (
-                  <TouchableOpacity
-                    key={id}
-                    onPress={() => {
-                      setUserIds([...userIds, x.display_info.id]);
-                      selectMember([...selectedMember, x]);
-                      filteredFans.splice(id, 1);
-                      setFans([...filteredFans]);
-                    }}
-                    style={styles.addMember}
-                  >
-                    <ShowInitialsOfName
-                      size={40}
-                      radius={20}
-                      fontSize={14}
-                      name={x.display_info.display_name}
-                      userId={x.display_info.id}
-                      imgUrl={x.display_info.avatar.url}
-                    />
-                    <Text style={styles.fans}>
-                      {x.display_info.display_name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })
+                  return (
+                    <TouchableOpacity
+                      key={id}
+                      onPress={() => {
+                        setUserIds([...userIds, x.display_info.id]);
+                        selectMember([...selectedMember, x]);
+                        filteredFans.splice(id, 1);
+                        setFans([...filteredFans]);
+                      }}
+                      style={styles.addMember}
+                    >
+                      <ShowInitialsOfName
+                        size={40}
+                        radius={20}
+                        fontSize={14}
+                        name={x.display_info.display_name}
+                        userId={x.display_info.id}
+                        imgUrl={x.display_info.avatar.url}
+                      />
+                      <Text style={styles.fans}>
+                        {x.display_info.display_name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })
               : null}
           </View>
         ) : null}
@@ -329,11 +366,12 @@ const TeamDetails = ({ navigation, route }) => {
         <View style={styles.memberContainer}>
           {isFetching ? (
             <ActivityIndicator color={colors.inputBlue} />
-          ) : filtered().map((item, id) => (
-            renderMember(item, id)
-          ))}
+          ) : (
+            filtered().map((item, id) => renderMember(item, id))
+          )}
         </View>
       </ScrollView>
+      {isLoader && <TeamLoader />}
     </View>
   );
 };

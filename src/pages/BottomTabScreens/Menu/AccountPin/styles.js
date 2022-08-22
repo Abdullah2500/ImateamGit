@@ -5,7 +5,7 @@ import { getHeightPixel, getWidthPixel } from "../../../../common/helper";
 const styles = StyleSheet.create({
   OTPContainer: {
     width: "80%",
-    height: 150,
+    maxHeight: getHeightPixel(100),
   },
   underlineStyleHighLighted: {
     width: getWidthPixel(40),

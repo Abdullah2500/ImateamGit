@@ -45,6 +45,7 @@ const Post = memo(
     pickerData,
     clearPickerData,
     setLoading,
+    isMediaLoading
   }) => {
     const commentInputRef = useRef();
     const [textShown, setTextShown] = useState(false); //To show ur remaining Text
@@ -100,28 +101,26 @@ const Post = memo(
 
     //like post function
     const likeHandler = async (id) => {
+      console.log("userId====>", id);
       const res = await likePosts(id);
-
       const like = res.liked_by_me;
       const count = res.counter;
-
+      console.log("response AT like====>", JSON.stringify(res));
       setMylike(like);
       setLikeCounter(count);
     };
-    console.log('this is')
 
     const setText = () => {
-      let text = ""
+      let text = "";
       if (post?.payload?.text.length > 80 && !textShown) {
         for (let i = 0; i < 80; i++) {
-          text += post?.payload?.text[i]
+          text += post?.payload?.text[i];
         }
+      } else {
+        text = post?.payload?.text;
       }
-      else {
-        text = post?.payload?.text
-      }
-      return text
-    }
+      return text;
+    };
     return (
       // SINGLE POST COMPONENTmoda
       <View style={styles.container}>
@@ -353,7 +352,6 @@ const Post = memo(
                     viewOffset: post?.attachments?.length ? -150 : 10,
                   });
                 }
-
               }}
             >
               <CommentIcon name="comment" size={25} color={colors.accentGray} />
@@ -410,6 +408,7 @@ const Post = memo(
             clearPickerData={clearPickerData}
             setLoading={setLoading}
             commentType={commentType}
+            isMediaLoading={isMediaLoading}
           />
         )}
         {/* Modal for Repost/reshare */}

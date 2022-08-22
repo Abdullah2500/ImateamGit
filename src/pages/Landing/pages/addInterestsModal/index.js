@@ -44,10 +44,10 @@ const AddInterestsModal = (props) => {
   const [selectedTags, selectTags] = useState([]);
   const [InterestsList, setInterestsList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [newSectionList, setNewSectionList] = useState([])
-  const [selectedSectionList, setSelctedSectionList] = useState([])
-  const [showList, setShowList] = useState(false)
-  const [tempHeight, setTempHeight] = useState(0)
+  const newSectionList = useRef([]);
+  const [selectedSectionList, setSelctedSectionList] = useState([]);
+  const [showList, setShowList] = useState(false);
+  const [tempHeight, setTempHeight] = useState(0);
   const dispatch = useDispatch();
 
   const { data: userInfo, isFetching: fetch } = useGetUserQuery();
@@ -65,7 +65,10 @@ const AddInterestsModal = (props) => {
 
     console.log("Hello i am logged in");
     const received = await updateProfileIntresetsAPI(body, (id = userInfo.id));
-    console.log('updateProfileIntresetsAPI response => ', JSON.stringify(received))
+    console.log(
+      "updateProfileIntresetsAPI response => ",
+      JSON.stringify(received)
+    );
     console.log("i am lenth", received.data, "i am sent");
     if (received) {
       dispatch(updateUserInfo(received));
@@ -123,31 +126,33 @@ const AddInterestsModal = (props) => {
       };
     });
     console.log("this is data ", newdata.length);
-    createSectionList(newdata)
+    createSectionList(newdata);
     setInterestsList(newdata);
     _getButtonItems(newdata);
   };
 
   const createSectionList = (data, flag = false, searchText) => {
     if (flag) {
-      let arr = data.filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()))
+      let arr = data.filter((item) =>
+        item.name.toLowerCase().includes(searchText.toLowerCase())
+      );
       data = arr;
     }
-    let categories = []
+    let categories = [];
     data.map((item) => {
       if (!categories.includes(item.interest_map_groups[0])) {
-        categories.push(item.interest_map_groups[0])
+        categories.push(item.interest_map_groups[0]);
       }
-    })
-    let tempSection = []
+    });
+    let tempSection = [];
     categories.map((item) => {
       tempSection.push({
         title: item.substring(2, item.length),
-        data: data.filter(val => val.interest_map_groups[0] == item)
-      })
-    })
-    setNewSectionList(tempSection)
-  }
+        data: data.filter((val) => val.interest_map_groups[0] == item),
+      });
+    });
+    newSectionList.current = tempSection;
+  };
 
   const _getButtonItems = (newdata) => {
     const items = [];
@@ -185,35 +190,38 @@ const AddInterestsModal = (props) => {
     if (selectedItems?.length == 0) {
       return;
     }
-    let categories = []
+    let categories = [];
     selectedItems?.map((item) => {
       if (!categories.includes(item.interest_map_groups[0])) {
-        categories.push(item.interest_map_groups[0])
+        categories.push(item.interest_map_groups[0]);
       }
-    })
-    let tempSection = []
+    });
+    let tempSection = [];
     categories.map((item) => {
       tempSection.push({
         title: item.substring(2, item.length),
-        data: selectedItems.filter(val => val.interest_map_groups[0] == item)
-      })
-    })
-    setSelctedSectionList(tempSection)
-  }
+        data: selectedItems.filter((val) => val.interest_map_groups[0] == item),
+      });
+    });
+    setSelctedSectionList(tempSection);
+  };
 
   useEffect(() => {
     getAPIdata();
   }, [userInfo?.interests]);
   useEffect(() => {
-    createSelectedSectionList()
-  }, [selectedItems])
-  const Container = Platform.OS == 'ios' ? View : ScrollView
-  const iosSectionStyle = Platform.OS == 'ios' ? {
-    position: 'absolute',
-    top: tempHeight,
-    left: getWidthPixel(15),
-    right: getWidthPixel(15),
-  } : {}
+    createSelectedSectionList();
+  }, [selectedItems]);
+  const Container = Platform.OS == "ios" ? View : ScrollView;
+  const iosSectionStyle =
+    Platform.OS == "ios"
+      ? {
+          // position: "absolute",
+          // // top: tempHeight,
+          // left: getWidthPixel(15),
+          // right: getWidthPixel(15),
+        }
+      : {};
   return (
     <Modal
       animationType="slide"
@@ -224,7 +232,7 @@ const AddInterestsModal = (props) => {
         console.log("alrt is closed");
       }}
     >
-      <Container style={AddInterestModalStyles.ModalContainer}>
+      <ScrollView style={AddInterestModalStyles.ModalContainer}>
         <View>
           <SafeAreaView>
             <View style={AddInterestModalStyles.header}>
@@ -338,19 +346,24 @@ const AddInterestsModal = (props) => {
           onLayout={(e) => setTempHeight(e.nativeEvent.layout.height)}
           style={{
             zIndex: 1,
-          }}>
+          }}
+        >
           <Text style={AddInterestModalStyles.sports}>Sports</Text>
-          <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            height: getHeightPixel(36),
-            marginHorizontal: getWidthPixel(15),
-            borderRadius: 10,
-          }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              height: getHeightPixel(36),
+              marginHorizontal: getWidthPixel(15),
+              borderRadius: 10,
+            }}
+          >
             <TextInput
               placeholder="Search.."
               placeholderTextColor={colors.accentGray}
-              onChangeText={(val) => createSectionList(InterestsList, true, val)}
+              onChangeText={(val) =>
+                createSectionList(InterestsList, true, val)
+              }
               style={{
                 flex: 1,
                 padding: getHeightPixel(10),
@@ -360,13 +373,14 @@ const AddInterestsModal = (props) => {
                 borderBottomLeftRadius: getWidthPixel(5),
                 borderColor: colors.accentGray,
                 color: colors.mineShaft,
-              }} />
+              }}
+            />
             <TouchableOpacity
               onPress={() => setShowList(!showList)}
               style={{
                 justifyContent: "center",
                 alignItems: "center",
-                alignSelf: 'center',
+                alignSelf: "center",
                 backgroundColor: colors.iconsBackground,
                 width: getWidthPixel(36),
                 height: getHeightPixel(36),
@@ -384,66 +398,80 @@ const AddInterestsModal = (props) => {
             </TouchableOpacity>
           </View>
           {/* Section List here */}
-          {
-            showList &&
-            <View style={{
-              maxHeight: getHeightPixel(300),
-              marginHorizontal: Platform.OS == 'android' ? getWidthPixel(15) : 0,
-              backgroundColor: colors.white,
-              borderColor: colors.accentGray,
-              borderWidth: 0.6,
-              borderBottomLeftRadius: 5,
-              borderBottomRightRadius: 5,
-              borderTopWidth: 0,
-              ...iosSectionStyle
-            }}>
+          {showList && (
+            <View
+              style={{
+                maxHeight: getHeightPixel(300),
+                marginHorizontal:
+                  // Platform.OS == "android" ? getWidthPixel(15) : 0,
+                  getWidthPixel(15),
+                backgroundColor: colors.white,
+                borderColor: colors.accentGray,
+                borderWidth: 0.6,
+                borderBottomLeftRadius: 5,
+                borderBottomRightRadius: 5,
+                borderTopWidth: 0,
+                // ...iosSectionStyle,
+              }}
+            >
               <SectionList
-                sections={newSectionList}
+                sections={newSectionList.current}
                 nestedScrollEnabled
                 stickySectionHeadersEnabled={true}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={(item, index) => item + index}
                 renderItem={({ item }) => {
                   return (
-                    <TouchableOpacity onPress={() => {
-                      selectItems((prev) => [...prev, item]);
-                      console.log(selectedItems);
-                    }}>
-                      <View style={{
-                        marginLeft: getWidthPixel(16),
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginVertical: getHeightPixel(5)
-                      }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        selectItems((prev) => [...prev, item]);
+                        console.log(selectedItems);
+                      }}
+                    >
+                      <View
+                        style={{
+                          marginLeft: getWidthPixel(16),
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginVertical: getHeightPixel(5),
+                        }}
+                      >
                         <EmptyProfileComp
                           name={item.name}
                           userId={item.id}
                           containerStyle={{
                             width: getWidthPixel(26),
-                            height: getWidthPixel(26)
-                          }} />
+                            height: getWidthPixel(26),
+                          }}
+                        />
                         <Text style={{}}>{item.name}</Text>
                       </View>
                     </TouchableOpacity>
-                  )
+                  );
                 }}
                 renderSectionHeader={({ section: { title } }) => (
-                  <View style={{
-                    paddingLeft: getWidthPixel(16),
-                    backgroundColor: 'white',
-                    paddingVertical: getHeightPixel(5)
-                  }}>
-                    <Text style={{
-                      fontFamily: 'Segoe UI',
-                      fontSize: 14,
-                      color: colors.black,
-                      fontWeight: '800'
-                    }}>{title}</Text>
+                  <View
+                    style={{
+                      paddingLeft: getWidthPixel(16),
+                      backgroundColor: "white",
+                      paddingVertical: getHeightPixel(5),
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Segoe UI",
+                        fontSize: 14,
+                        color: colors.black,
+                        fontWeight: "800",
+                      }}
+                    >
+                      {title}
+                    </Text>
                   </View>
                 )}
               />
             </View>
-          }
+          )}
         </View>
 
         {/* <DropDownPicker
@@ -471,71 +499,77 @@ const AddInterestsModal = (props) => {
             paddingLeft: getWidthPixel(15),
           }}
         >
-          {selectedSectionList?.length != 0 ? (
-            selectedSectionList.map((section, index) => <View key={index}>
-              <Text style={{
-                fontFamily: 'Segoe UI',
-                fontSize: 14,
-                color: colors.black,
-                fontWeight: '800'
-              }}>{section.title}</Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-                {section.data?.map((item, i) => (
-                  <View key={i.toString()}>
-                    <View
-                      style={{
-                        backgroundColor: colors.accentGray,
-                        flexDirection: "row",
-                        paddingHorizontal: 4,
-                        borderRadius: 20,
-                        alignItems: "center",
-                        marginLeft: getWidthPixel(4),
-                        marginVertical: getHeightPixel(4),
-                      }}
-                    >
-                      <View
-                        style={{
-                          height: getHeightPixel(20),
-                          width: getWidthPixel(20),
-                          borderRadius: 40,
-                          marginVertical: 2,
-                          backgroundColor: item.color,
-                        }}
-                      >
-                        <Text
+          {selectedSectionList?.length != 0
+            ? selectedSectionList.map((section, index) => (
+                <View key={index}>
+                  <Text
+                    style={{
+                      fontFamily: "Segoe UI",
+                      fontSize: 14,
+                      color: colors.black,
+                      fontWeight: "800",
+                    }}
+                  >
+                    {section.title}
+                  </Text>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                    {section.data?.map((item, i) => (
+                      <View key={i.toString()}>
+                        <View
                           style={{
-                            textAlign: "center",
-                            ...font(13, "bold"),
-                            // color: item.color,
-                            color: 'white'
+                            backgroundColor: colors.accentGray,
+                            flexDirection: "row",
+                            paddingHorizontal: 4,
+                            borderRadius: 20,
+                            alignItems: "center",
+                            marginLeft: getWidthPixel(4),
+                            marginVertical: getHeightPixel(4),
                           }}
                         >
-                          {showInitials(item.name)}
-                        </Text>
+                          <View
+                            style={{
+                              height: getHeightPixel(20),
+                              width: getWidthPixel(20),
+                              borderRadius: 40,
+                              marginVertical: 2,
+                              backgroundColor: item.color,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                textAlign: "center",
+                                ...font(13, "bold"),
+                                // color: item.color,
+                                color: "white",
+                              }}
+                            >
+                              {showInitials(item.name)}
+                            </Text>
+                          </View>
+                          <Text
+                            style={{
+                              ...font(14, "bold"),
+                              paddingHorizontal: 6,
+                              paddingVertical: 2,
+                              color: "#fff",
+                            }}
+                          >
+                            {item.name}
+                          </Text>
+                          <TouchableWithoutFeedback
+                            onPress={
+                              () => checkList(item) //REMOVE ITEM FROM NAMELIST....
+                            }
+                          >
+                            <Icon name="close" size={12} color="#fff" />
+                          </TouchableWithoutFeedback>
+                        </View>
                       </View>
-                      <Text
-                        style={{
-                          ...font(14, "bold"),
-                          paddingHorizontal: 6,
-                          paddingVertical: 2,
-                          color: "#fff",
-                        }}
-                      >
-                        {item.name}
-                      </Text>
-                      <TouchableWithoutFeedback
-                        onPress={
-                          () => checkList(item) //REMOVE ITEM FROM NAMELIST....
-                        }
-                      >
-                        <Icon name="close" size={12} color="#fff" />
-                      </TouchableWithoutFeedback>
-                    </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-            </View>)
-          ) : null}
+                </View>
+              ))
+            : null}
         </View>
 
         <View style={AddInterestModalStyles.tagsContainer}>
@@ -609,7 +643,12 @@ const AddInterestsModal = (props) => {
           ))}
         </View>
 
-        <View style={{ ...AddInterestModalStyles.saveButton, paddingTop: getHeightPixel(10) }}>
+        <View
+          style={{
+            ...AddInterestModalStyles.saveButton,
+            paddingTop: getHeightPixel(10),
+          }}
+        >
           <ButtonCommon
             title={"CONTINUE"}
             method={async () => {
@@ -620,7 +659,7 @@ const AddInterestsModal = (props) => {
             loading={loading}
           />
         </View>
-      </Container>
+      </ScrollView>
     </Modal>
   );
 };

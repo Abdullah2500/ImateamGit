@@ -474,7 +474,10 @@ const StartConversation = ({ navigation, route }) => {
           navigation={navigation}
           comment={message}
           setComment={(text) => setMessage(text)}
-          fileBottomOpen={() => fileBottomOpen()}
+          fileBottomOpen={() => {
+            Keyboard.dismiss()
+            fileBottomOpen()
+          }}
           list={imageArray}
           updateArray={(item) => {
             setImageArray((pre) => {

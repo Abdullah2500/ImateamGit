@@ -413,7 +413,6 @@ const Fans = ({ navigation }) => {
                 style={{ padding: 16, color: "#fff" }}
               />
             </TouchableOpacity>
-            {/* <AddButton onPress={() => setFansModal(true)} /> */}
           </Animated.View>
         </PanGestureHandler>
         {isFetching ? (

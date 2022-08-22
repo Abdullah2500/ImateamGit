@@ -38,6 +38,7 @@ import StoreScreen from "./src/pages/BottomTabScreens/Store/StoreScreen";
 import AddStore from "./src/pages/BottomTabScreens/Store/AddStore";
 import AddProduct from "./src/pages/BottomTabScreens/Store/AddProduct";
 import ProductScreen from "./src/pages/BottomTabScreens/Products/ProductScreen";
+import AboutUs from "./src/pages/BottomTabScreens/Menu/MainMenu/AboutUs";
 const Stack = createNativeStackNavigator();
 const App = () => {
   async function requestUserPermission() {
@@ -235,6 +236,13 @@ const App = () => {
               <Stack.Screen
                 name="AccountPin"
                 component={AccountPin}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+                name="About"
+                component={AboutUs}
                 options={{
                   headerShown: false,
                 }}

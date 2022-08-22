@@ -171,7 +171,7 @@ const SingleChat = ({ navigation, route }) => {
     console.log("img: ", img);
     if (img.fileInfo.fileType.substring(0, 2) == "vi") {
       console.log("this is video");
-      RNFS.readFile(img.path, "base64").then((RNFSresponse) => {
+      await RNFS.readFile(img.path, "base64").then((RNFSresponse) => {
         // console.log("RNFSresponse: ", RNFSresponse);
         const obj = {
           data: RNFSresponse,
@@ -187,7 +187,7 @@ const SingleChat = ({ navigation, route }) => {
       });
     } else {
       if (img.path) {
-        ImgToBase64.getBase64String(img.path)
+        await ImgToBase64.getBase64String(img.path)
           .then((base64String) => {
             // console.log("base64String: ", base64String);
             const temp = base64String;
@@ -231,9 +231,13 @@ const SingleChat = ({ navigation, route }) => {
         "Bursts",
       ],
     }).then((image) => {
+      if (image.length > 8) {
+        alert('Total images length should be less than 8')
+        return;
+      }
       //setUri(image.path);
       console.log("ma image wala hn", image);
-      image.map((item) => {
+      image.map(async (item) => {
         let imageName = item.filename;
         if (Platform.OS === "android") {
           imageName = new Date();
@@ -250,7 +254,7 @@ const SingleChat = ({ navigation, route }) => {
           },
         };
         console.log("item -> ", item);
-        convertImageToBase64(imgobj);
+        await convertImageToBase64(imgobj);
       });
     });
     // console.log("i am image converted in base 64", Uri);
@@ -266,10 +270,14 @@ const SingleChat = ({ navigation, route }) => {
         type: DocumentPicker.types.pdf,
         allowMultiSelection: true,
       });
+      if (pickerResult.length > 8) {
+        alert('Total documents length should be less than 8')
+        return;
+      }
       //  console.log("pickerResult: ", pickerResult);
       pickerResult.map(async (item) => {
         //  console.log("item: ", item);
-        RNFS.readFile(item.uri, "base64").then((RNFSresponse) => {
+        await RNFS.readFile(item.uri, "base64").then((RNFSresponse) => {
           // console.log("RNFSresponse: ", RNFSresponse);
 
           const obj = {
@@ -303,7 +311,7 @@ const SingleChat = ({ navigation, route }) => {
       multiple: true,
       mediaType: "photo",
       // useFrontCamera: true,
-    }).then((image) => {
+    }).then(async (image) => {
       //setUri(image.path);
       console.log("ma image wala hn", image);
 
@@ -321,7 +329,7 @@ const SingleChat = ({ navigation, route }) => {
         },
       };
 
-      convertImageToBase64(imgobj);
+      await convertImageToBase64(imgobj);
       //   );
     });
     setTimeout(() => setFlag(!flag), 500);
@@ -421,17 +429,19 @@ const SingleChat = ({ navigation, route }) => {
       )}
 
       <KeyboardAvoidingView
-        // keyboardVerticalOffset={getHeightPixel(45)}
         keyboardVerticalOffset={Platform.select({
           ios: getHeightPixel(25),
-          android: getHeightPixel(15),
+          android: 0,
         })}
-        behavior={Platform.OS == "ios" ? "padding" : "position"}
+        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
       >
         <MessageComponent
           comment={comment}
           setComment={(text) => setComment(text)}
-          fileBottomOpen={() => fileBottomOpen()}
+          fileBottomOpen={() => {
+            Keyboard.dismiss()
+            fileBottomOpen()
+          }}
           // onFocus={scrollToBottom}
           list={imageArray}
           updateArray={(item) => {

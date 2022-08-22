@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import colors from "../../../../common/colors";
 import { font, getHeightPixel, getWidthPixel } from "../../../../common/helper";
@@ -38,7 +38,7 @@ function SecuritySetting({ navigation }) {
 
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1 }}>
       <View style={styles.ItemWrapper}>
         <View style={{ flex: 2 }}>
           <Text style={styles.optionTitle}>Account Password</Text>
@@ -123,7 +123,7 @@ function SecuritySetting({ navigation }) {
           />
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

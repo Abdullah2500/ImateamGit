@@ -54,6 +54,7 @@ const MainLanding = ({ navigation, route }) => {
     setModalVisible(!mVisible);
   };
   const postListRef = useRef();
+  const [isMediaLoading, setIsMediaLoading] = useState(false)
 
   useEffect(() => {
     if (route?.params?.type === "postCreated") {
@@ -134,6 +135,7 @@ const MainLanding = ({ navigation, route }) => {
           pickerData={postAttachmentIndex === index ? pickerData : []}
           clearPickerData={setPickerData}
           setLoading={setLoading}
+          isMediaLoading={isMediaLoading}
         />
       </View>
     );
@@ -179,6 +181,10 @@ const MainLanding = ({ navigation, route }) => {
   const keyExtractor = (item, index) => index.toString();
   const flatListRef = useRef(null)
   const flatListRef2 = useRef(null)
+  const [flag, setFlag] = useState(false)
+  useEffect(() => {
+    setLoading(false)
+  }, [flag])
   return (
     <View style={styles.container}>
       <SafeAreaView style={{ backgroundColor: "#fff" }}>
@@ -264,6 +270,12 @@ const MainLanding = ({ navigation, route }) => {
             setAttachmentShown(false);
           }}
           showAttachmentPicker={(val) => setAttachmentShown(val)}
+          setIsMediaLoading={(val) => {
+            setIsMediaLoading(val)
+            setTimeout(() => {
+              setFlag(!flag)
+            }, 200);
+          }}
         />
       </KeyboardAvoidingView>
       {/* 

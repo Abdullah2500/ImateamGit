@@ -80,6 +80,7 @@ const CreatePost = ({ navigation, route }) => {
   const [orignalAttachments, setOrginalAttachments] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImage, setModalImage] = useState(null);
+  const [isMediaLoading, setIsMediaLoading] = useState(false)
   //console.log(userInfo);
   const sampleProfile =
     "https://alchinlong.com/wp-content/uploads/2015/09/sample-profile-320x320.png";
@@ -113,7 +114,7 @@ const CreatePost = ({ navigation, route }) => {
       fileBottomSheetRef.current.expand();
     }
     else {
-      Alert.alert("","Maximum 8 files can be attach.")
+      Alert.alert("", "Maximum 8 files can be attach.")
     }
   };
 
@@ -157,8 +158,13 @@ const CreatePost = ({ navigation, route }) => {
         type: DocumentPicker.types.pdf,
         allowMultiSelection: true,
       });
+      if (pickerResult.length > 8) {
+        alert('Documents length cannot be more than 8')
+        return
+      }
+      setIsMediaLoading(true)
       //  console.log("pickerResult: ", pickerResult);
-      pickerResult.map(async (item) => {
+      pickerResult.map(async (item, index) => {
         //  console.log("item: ", item);
         RNFS.readFile(item.uri, "base64").then((RNFSresponse) => {
           // console.log("RNFSresponse: ", RNFSresponse);
@@ -181,6 +187,7 @@ const CreatePost = ({ navigation, route }) => {
         // console.log("obj: ", obj);
 
         // convertImageToBase64(obj);
+        if (index == pickerResult.length - 1) setIsMediaLoading(false)
       });
     } catch (error) {
       console.log("error in picking file", error);
@@ -195,7 +202,7 @@ const CreatePost = ({ navigation, route }) => {
       multiple: true,
       mediaType: "any",
       useFrontCamera: true,
-      compressImageQuality : 0.7,
+      compressImageQuality: 0.7,
       smartAlbums: [
         "UserLibrary",
         "PhotoStream",
@@ -204,12 +211,16 @@ const CreatePost = ({ navigation, route }) => {
         "Bursts",
       ],
     }).then((images) => {
+      if (images.length > 8) {
+        alert('Images length cannot be more than 8')
+        return
+      }
       //setUri(image.path);
       let image = []
       console.log("ma image wala hn", image);
       let count = Uri.length
-      for(let i=0;i<images.length;i++){
-        if (count != 8){
+      for (let i = 0; i < images.length; i++) {
+        if (count != 8) {
           image.push(images[i])
           count += 1
         }
@@ -217,6 +228,7 @@ const CreatePost = ({ navigation, route }) => {
           break
         }
       }
+      setIsMediaLoading(true)
       image.map((item) => {
         let imageName = item.filename;
         if (Platform.OS === "android") {
@@ -232,10 +244,11 @@ const CreatePost = ({ navigation, route }) => {
             fileSize: item.size,
             fileType: item.mime,
           },
-        };        
+        };
         setUri((prevArray) => [...prevArray, imgobj]);
 
         convertImageToBase64(imgobj);
+        if (index == image.length - 1) setIsMediaLoading(false)
       });
     });
     // console.log("i am image converted in base 64", Uri);
@@ -245,7 +258,7 @@ const CreatePost = ({ navigation, route }) => {
     await ImagePicker.openCamera({
       width: getWidthPixel(300),
       height: getHeightPixel(400),
-      compressImageQuality : 0.7,
+      compressImageQuality: 0.7,
       //  cropping: true,
       multiple: true,
       mediaType: "photo",
@@ -594,6 +607,22 @@ const CreatePost = ({ navigation, route }) => {
               flexWrap: "wrap",
             }}
           >
+            {
+              isMediaLoading &&
+              <View style={{
+                backgroundColor: "rgba(0,0,0,0.3)",
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1
+              }}>
+                <ActivityIndicator color='white' size='small' />
+              </View>
+            }
             {Uri.map((item, index) => (
               <View
                 key={index}

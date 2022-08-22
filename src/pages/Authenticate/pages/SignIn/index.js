@@ -52,7 +52,7 @@ const SignIn = ({ navigation }) => {
     } else {
       if (user.email && user.password) {
         setLoading(true);
-        const res = await LoginAPI(user.email, user.password);
+        const res = await LoginAPI(user.email.toLowerCase(), user.password);
         console.log("login resp", res);
         if (res?.token) {
           moveToNextScreen(navigation, "MainLanding");

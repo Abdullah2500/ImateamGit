@@ -45,6 +45,28 @@ const MessageComponent = (props) => {
         }
       }
     >
+      {props.list?.length > 0 && (
+        <View
+          style={{
+            height: 100,
+            backgroundColor: colors.ghostWhite
+          }}
+        >
+          <ScrollView
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            style={{
+              borderTopColor: colors.grayLight,
+              borderTopWidth: 1,
+            }}
+          >
+            <AttachmentListComp
+              Uri={props.list}
+              updateArray={(item) => props.updateArray(item)}
+            />
+          </ScrollView>
+        </View>
+      )}
       <View style={styles.content2Wrapper}>
         {/* {The Message box section is here} */}
         <View
@@ -100,27 +122,6 @@ const MessageComponent = (props) => {
           />
         </TouchableOpacity>
       </View>
-      {props.list?.length > 0 && (
-        <View
-          style={{
-            height: 100,
-          }}
-        >
-          <ScrollView
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            style={{
-              borderTopColor: colors.grayLight,
-              borderTopWidth: 1,
-            }}
-          >
-            <AttachmentListComp
-              Uri={props.list}
-              updateArray={(item) => props.updateArray(item)}
-            />
-          </ScrollView>
-        </View>
-      )}
     </View>
   );
 };

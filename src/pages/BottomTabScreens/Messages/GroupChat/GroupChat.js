@@ -214,6 +214,10 @@ const GroupChat = ({ navigation, route }) => {
         "Bursts",
       ],
     }).then((image) => {
+      if (image.length > 8) {
+        alert('Total images length should be less than 8')
+        return;
+      }
       //setUri(image.path);
       console.log("ma image wala hn", image);
       image.map((item) => {
@@ -249,6 +253,10 @@ const GroupChat = ({ navigation, route }) => {
         type: DocumentPicker.types.pdf,
         allowMultiSelection: true,
       });
+      if (pickerResult.length > 8) {
+        alert('Total documents length should be less than 8')
+        return;
+      }
       //  console.log("pickerResult: ", pickerResult);
       pickerResult.map(async (item) => {
         //  console.log("item: ", item);
@@ -405,17 +413,19 @@ const GroupChat = ({ navigation, route }) => {
         </View>
       )}
       <KeyboardAvoidingView
-        // keyboardVerticalOffset={getHeightPixel(45)}
         keyboardVerticalOffset={Platform.select({
           ios: getHeightPixel(25),
-          android: getHeightPixel(20),
+          android: 0,
         })}
-        behavior={Platform.OS == "ios" ? "padding" : "position"}
+        behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
       >
         <MessageComponent
           comment={comment}
           setComment={(text) => setComment(text)}
-          fileBottomOpen={() => fileBottomOpen()}
+          fileBottomOpen={() => {
+            Keyboard.dismiss()
+            fileBottomOpen()
+          }}
           list={imageArray}
           // onFocus={scrollToBottom}
           updateArray={(item) => {

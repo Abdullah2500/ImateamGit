@@ -7,6 +7,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import styles from "./styles";
 import addComment from "../../../../Reducers/addCommentApi";
@@ -32,6 +33,7 @@ function AddComment(props) {
     pickerData,
     clearPickerData,
     commentType,
+    isMediaLoading
     //  setLoading,
   } = props;
   const [val, setVal] = useState("");
@@ -42,10 +44,7 @@ function AddComment(props) {
 
   const keyboardVerticalOffset = Platform.OS === "ios" ? 0 : 0;
 
-  console.log('pickerData.length => ', pickerData.length)
-
   useEffect(() => {
-    console.log("pickerData from useEffect: ", pickerData);
     setUri([]);
     setUri(pickerData);
     console.log("i am comment type ", commentType);
@@ -110,7 +109,6 @@ function AddComment(props) {
   const toggleAttachments = () => {
     showAttachmentPicker(!attachmentShown);
   };
-
   return (
     <View>
       <Loading isLoading={loading} backgroundColor={colors.white} />
@@ -151,7 +149,7 @@ function AddComment(props) {
         </TouchableOpacity>
       </View>
       {
-        Uri.length > 0 &&
+        (Uri.length > 0 || isMediaLoading) &&
         <View style={{
           height: 100,
           borderTopColor: colors.grayLight,
@@ -160,6 +158,22 @@ function AddComment(props) {
           borderBottomWidth: 1,
           paddingBottom: Platform.OS == 'ios' ? getHeightPixel(20) : 0
         }}>
+          {
+            isMediaLoading &&
+            <View style={{
+              backgroundColor: "rgba(0,0,0,0.3)",
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: 0,
+              left: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1
+            }}>
+              <ActivityIndicator color='white' size='small' />
+            </View>
+          }
           <ScrollView
             horizontal={true}
             showsHorizontalScrollIndicator={false}
@@ -167,7 +181,7 @@ function AddComment(props) {
             <AttachmentListComp
               Uri={Uri}
               updateArray={(item) => clearPickerData((pre) => {
-                return pre.filter((temp) => temp != item);
+                return pre.filter((temp) => temp.fileInfo.filename != item.fileInfo.filename);
               })}
             />
           </ScrollView>

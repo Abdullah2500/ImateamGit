@@ -122,6 +122,10 @@ const ImageUpload = ({ open, handleModal, orgInfo, setReload }) => {
   // };
   async function updateAvatar() {
     // setLoading(true);
+    if (imageArray.length > 8) {
+      alert("Attachments length should not exceed 8");
+      return;
+    }
     setGetImagesLoading(true);
     let jsonBody = {
       // memberId: orgInfo?.id,
@@ -226,6 +230,10 @@ const ImageUpload = ({ open, handleModal, orgInfo, setReload }) => {
         "Bursts",
       ],
     }).then((image) => {
+      if (image.length > 8) {
+        alert('Total images length should be less than 8')
+        return;
+      }
       //setUri(image.path);
       console.log("ma image wala hn", image);
       image.map(async (item) => {
@@ -251,7 +259,7 @@ const ImageUpload = ({ open, handleModal, orgInfo, setReload }) => {
     // console.log("i am image converted in base 64", Uri);
     setTimeout(() => setFlag(!flag), 500);
   };
-  console.log('imageArray.length => ', imageArray.length)
+  console.log("imageArray.length => ", imageArray.length);
 
   // Document
   const chooseDocument = async () => {
@@ -262,6 +270,10 @@ const ImageUpload = ({ open, handleModal, orgInfo, setReload }) => {
         type: DocumentPicker.types.pdf,
         allowMultiSelection: true,
       });
+      if (pickerResult.length > 8) {
+        alert('Total documents length should be less than 8')
+        return;
+      }
       pickerResult.map(async (item) => {
         RNFS.readFile(item.uri, "base64").then((RNFSresponse) => {
           // console.log("RNFSresponse: ", RNFSresponse);

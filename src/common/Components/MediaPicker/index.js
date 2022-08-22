@@ -19,9 +19,8 @@ import { font, getHeightPixel, getWidthPixel } from "../../helper";
 import BottomSheet from "@gorhom/bottom-sheet";
 
 const MediaPicker = (props) => {
-  const { flag, getPickerData, showAttachmentPicker } = props;
+  const { flag, getPickerData, showAttachmentPicker, setIsMediaLoading } = props;
   const [imageArray, setImageArray] = useState([]);
-
   // BOTTOMSHEET FUNCTIONS FOR OPENING AND CLOSING
 
   const fileBottomSheetRef = useRef();
@@ -56,7 +55,7 @@ const MediaPicker = (props) => {
           console.log(" images array", imageArray);
           //return temp;
         })
-        .catch((err) => "not converted");
+        .catch((err) => console.log("not converted", err))
     }
   };
   //j document picker
@@ -68,8 +67,13 @@ const MediaPicker = (props) => {
         type: DocumentPicker.types.pdf,
         allowMultiSelection: true,
       });
+      if (pickerResult.length > 8) {
+        alert('Total documents length should be less than 8')
+        return;
+      }
+      setIsMediaLoading(true)
       //  console.log("pickerResult: ", pickerResult);
-      pickerResult.map(async (item) => {
+      pickerResult.map(async (item, index) => {
         //  console.log("item: ", item);
         await RNFS.readFile(item.uri, "base64").then((RNFSresponse) => {
           // console.log("RNFSresponse: ", RNFSresponse);
@@ -82,15 +86,17 @@ const MediaPicker = (props) => {
               fileType: item.type,
             },
           };
-
           let temArray = imageArray;
           temArray.push(obj);
           //console.log("temArray", temArray);
+          getPickerData(imageArray);
           setImageArray(temArray);
         });
+        if (index == pickerResult.length - 1) setIsMediaLoading(false)
       });
     } catch (error) {
       console.log("error in picking file", error);
+      setIsMediaLoading(false)
     }
   };
   const chooseImage = async () => {
@@ -110,27 +116,35 @@ const MediaPicker = (props) => {
         "Bursts",
       ],
     }).then((image) => {
+      if (image.length > 8) {
+        alert('Total images length should be less than 8')
+        return;
+      }
       //setUri(image.path);
-      console.log("ma image wala hn", image);
-      image.map(async (item) => {
-        let imageName = item.filename;
-        if (Platform.OS === "android") {
-          imageName = new Date();
-          console.log(" time stamp", imageName);
-        }
+      try {
+        setIsMediaLoading(true)
+        image.map(async (item, index) => {
+          let imageName = item.filename;
+          if (Platform.OS === "android") {
+            imageName = new Date();
+            console.log(" time stamp", imageName);
+          }
 
-        const imgobj = {
-          path: item.path,
-          // data: convertImageToBase64(item.path),
-          fileInfo: {
-            filename: imageName,
-            fileSize: item.size,
-            fileType: item.mime,
-          },
-        };
-
-        await convertImageToBase64(imgobj);
-      });
+          const imgobj = {
+            path: item.path,
+            // data: convertImageToBase64(item.path),
+            fileInfo: {
+              filename: imageName,
+              fileSize: item.size,
+              fileType: item.mime,
+            },
+          };
+          await convertImageToBase64(imgobj);
+          if (index == image.length - 1) setIsMediaLoading(false)
+        })
+      } catch (e) {
+        console.log('Error while converting images ', e)
+      }
     });
     // console.log("i am image converted in base 64", Uri);
   };
@@ -145,7 +159,7 @@ const MediaPicker = (props) => {
       // useFrontCamera: true,
     }).then((image) => {
       //setUri(image.path);
-      console.log("ma image wala hn", image);
+      console.log("Image from camera: ", image);
 
       let imageName = new Date();
 
@@ -183,7 +197,6 @@ const MediaPicker = (props) => {
       initialSnapIndex={-1}
       enablePanDownToClose={true}
       ref={fileBottomSheetRef}
-      backgroundColor="red"
       onChange={(index) => {
         console.log("i am working", index);
         showAttachmentPicker(false);

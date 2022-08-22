@@ -2,7 +2,6 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const LoginAPI = async (email, password) => {
   try {
-    console.log(email + "  " + password);
     const url = "https://dev.imateam.us:8443/auth/login/";
     const body = {
       email: email,

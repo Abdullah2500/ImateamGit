@@ -124,10 +124,10 @@ export const SignUpStep2Styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     marginLeft: getWidthPixel(6),
-    marginVertical: getHeightPixel(4),
+    marginVertical: getHeightPixel(5),
   },
   tagListText: {
-    marginHorizontal: 5, 
+    marginHorizontal: 5,
     ...font(12, "500"),
     color: colors.white,
   },
@@ -138,11 +138,11 @@ export const SignUpStep2Styles = StyleSheet.create({
   //   marginVertical: 2,
   //   backgroundColor: item.color,
   // },
-  tagIconText:{
+  tagIconText: {
     textAlign: "center",
     ...font(14, "bold"),
     color: colors.white,
-  },  
+  },
   interests: {
     zIndex: 1,
   },
